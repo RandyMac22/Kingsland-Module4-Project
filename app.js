@@ -431,37 +431,80 @@ const app = Sammy("#main", function () {
 		console.log("Organize event form submitted");
 		console.log(this);
 
-		let data = {
-			name: this.params.name,
-			dateTime: this.params.dateTime,
-			description: this.params.description,
-			imageURL: this.params.imageURL,
-			creator: userName,
-			userID: user,
-			peopleInterstedIn: "0",
-		};
+		let nameRegex = /\S{6,}/gm;
+		let dateTimeRegex = /(?<day>\d{1,2}) (?<month>\w{3,9}) ?-? ?(\d{1,2})?\:?(\d{2})? ?[AP]?[M]?/gm;
+		let descriptionRegex = /\S{10,}/gm;
+		let imageRegex = /^(https:\/\/)||^(http:\/\/)/gm;
 
-		let url =
-			"https://unievent-b9dfd-default-rtdb.firebaseio.com/events.json";
-		let headers = {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(data),
-		};
-		fetch(url, headers).then((response) => {
-			if (response.status == 200) {
-				console.log("Added Event!");
-				successBox.innerText = "Event created successfully.";
-				successBox.style.display = "block";
-				setTimeout(function () {
-					successBox.style.display = "none";
-				}, 5000);
-
-				context.redirect("#/homepage");
+		if (nameRegex.test(this.params.name)){
+			if(dateTimeRegex.test(this.params.dateTime)){
+				if (descriptionRegex.test(this.params.description)){
+					if(imageRegex.test(this.params.imageURL)){
+						let data = {
+							name: this.params.name,
+							dateTime: this.params.dateTime,
+							description: this.params.description,
+							imageURL: this.params.imageURL,
+							creator: userName,
+							userID: user,
+							peopleInterstedIn: 0,
+						};
+				
+						let url =
+							"https://unievent-b9dfd-default-rtdb.firebaseio.com/events.json";
+						let headers = {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify(data),
+						};
+						fetch(url, headers).then((response) => {
+							if (response.status == 200) {
+								console.log("Added Event!");
+								successBox.innerText = "Event created successfully.";
+								successBox.style.display = "block";
+								setTimeout(function () {
+									successBox.style.display = "none";
+								}, 5000);
+				
+								context.redirect("#/homepage");
+							}
+						});
+					} else {
+						errorBox.innerText = "Image URL should start with http://... or https://... Click here to try again";
+						errorBox.style.display = "block";
+						errorBox.addEventListener('click', function(){
+							errorBox.style.display = "none";
+							context.redirect("/register");
+						});
+					}
+				} else {
+					errorBox.innerText = "The event description should be at least 10 characters. Click here to try again";
+					errorBox.style.display = "block";
+					errorBox.addEventListener('click', function(){
+						errorBox.style.display = "none";
+						context.redirect("/register");
+					});
+				}
+			} else {
+				errorBox.innerText = "The event date and time should be valid(24 May; 24 September - 12:00 PM). Click here to try again";
+				errorBox.style.display = "block";
+				errorBox.addEventListener('click', function(){
+					errorBox.style.display = "none";
+					context.redirect("/register");
+				});
 			}
-		});
+		} else {
+			errorBox.innerText = "The name of the event must be at least 6 english letters. Click here to try again";
+			errorBox.style.display = "block";
+			errorBox.addEventListener('click', function(){
+				errorBox.style.display = "none";
+				context.redirect("/register");
+			});
+		}
+
+		
 	});
 });
 
