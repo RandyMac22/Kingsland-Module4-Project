@@ -5,9 +5,8 @@ let successBox = document.getElementById("successBox");
 let loadingBox = document.getElementById("loadingBox");
 let errorBox = document.getElementById("errorBox");
 
-const app = Sammy("#main", function () {
+const app = Sammy("#main", function() {
 	this.use("Handlebars", "hbs");
-
 	//Index
 	this.get("#/index", function (context) {
 		context
@@ -42,10 +41,8 @@ const app = Sammy("#main", function () {
 		let username = this.params.username;
 		let password = this.params.password;
 		let repeatPassword = this.params.rePassword;
-
 		let userRegex = /\S{3,}/gm;
 		let passRegex = /\S{6,}/gm;
-
 		if (userRegex.test(username)) {
 		 	if (passRegex.test(password)) {
 		 		if (repeatPassword == password) {
@@ -151,11 +148,9 @@ const app = Sammy("#main", function () {
 					eventObj.id = eventID;
 					return eventObj;
 				});
-
 				console.log(eventsArray);
 				context.event = eventsArray;
 				//console.log(context.event);
-
 				context
 					.loadPartials({
 						header: "./views/headerLoggedIn.hbs",
@@ -202,7 +197,6 @@ const app = Sammy("#main", function () {
 	this.post("#/login", function (context) {
 		let username = this.params.username;
 		let password = this.params.password;
-
 		fetch("https://unievent-b9dfd-default-rtdb.firebaseio.com/user.json")
 			.then((response) => {
 				loadingBox.style.display = "block";
@@ -220,7 +214,6 @@ const app = Sammy("#main", function () {
 					userObj.creator = username;
 					return userObj.username == username;
 				});
-
 				if (hasUser != undefined) {
 					//document.getElementById('username').classList.remove('is-invalid');
 					if (hasUser[1].password == password) {
@@ -247,7 +240,6 @@ const app = Sammy("#main", function () {
 				}
 			});
 	});
-
 	//Logout
 	this.get("#/logout", function (context) {
 		user = "";
@@ -264,46 +256,58 @@ const app = Sammy("#main", function () {
 	});
 	//Details
 	this.get("#/details/:id", function (context) {
+		let eventID = this.params.id;
 		context.userName = userName;
-		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/events.json`)
+		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/events/${eventID}.json`)
 			.then((response) => {
 				//console.log(response);
 				return response.json();
 			})
-			.then((data) => {
+			.then(data => {
 				console.log(data);
 				let events = data;
 
-				context
+				let joinBtn = document.getElementById('joinBtn');
+				let deleteBtn = document.getElementById('deleteBtn');
+				let editBtn = document.getElementById('editBtn');
+
+				context.name = events.name;
+				context.dateTime = events.dateTime;
+				context.description = events.description;
+				context.imageURL = events.imageURL;
+				context.creator = events.creator;
+				context.peopleInterstedIn = events.peopleInterstedIn;
+
+				if (context.creator == context.userName){
+					context
 					.loadPartials({
 						header: "./views/headerLoggedIn.hbs",
 						footer: "./views/footer.hbs",
 					})
 					.then(function () {
-						this.partial(
-							"./views/eventDetails.hbs",
-							function (details) {
+						this.partial("./views/eventDetailsCreator.hbs", function (details) {
 								console.log("Went to details!");
 							}
 						);
-					})
-					.then(function (event) {
-						if (event.creator == userName) {
-							document.getElementById("joinBtn").style.display =
-								"none";
-						}
 					});
-
-				context.description = events.description;
-				context.imageURL = events.imageURL;
-				context.dateTime = events.dateTime;
-				context.name = events.name;
-				context.creator = events.creator;
-				context.peopleInterstedIn = events.peopleInterstedIn;
+				} else {
+					context
+					.loadPartials({
+						header: "./views/headerLoggedIn.hbs",
+						footer: "./views/footer.hbs",
+					})
+					.then(function () {
+						this.partial("./views/eventDetails.hbs", function (details) {
+								console.log("Went to details!");
+							}
+						);
+					});
+				}
 			})
 			.catch((err) => {
 				console.log(err);
 			});
+
 	});
 	// //Profile
 	this.get("#/profile", function (context) {
@@ -316,10 +320,8 @@ const app = Sammy("#main", function () {
 			.then(function (data) {
 				// get the template as a handlebars string
 				console.log(data);
-
 				//take data and turn it into an array of objects
 				let eventsArray = Object.entries(data);
-
 				console.log(eventsArray);
 				eventsArray = eventsArray
 					.map(function (innerArray) {
@@ -331,10 +333,8 @@ const app = Sammy("#main", function () {
 					.filter(function (object) {
 						return user == object.userID;
 					});
-
 				console.log(eventsArray);
 				context.events = eventsArray;
-
 				context
 					.loadPartials({
 						header: "./views/headerLoggedIn.hbs",
@@ -372,7 +372,6 @@ const app = Sammy("#main", function () {
 	this.get("#/edit/:id", function (context) {
 		let eventID = this.params.id;
 		context.userName = userName;
-
 		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/events/${eventID}.json`)
 			.then((response) => {
 				return response.json();
@@ -396,7 +395,6 @@ const app = Sammy("#main", function () {
 	this.post("#/edit/:id", function (context) {
 		let eventID = this.params.id;
 		context.userName = userName;
-
 		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/events/${eventID}.json`)
 			.then((response) => {
 				return response.json();
@@ -408,11 +406,8 @@ const app = Sammy("#main", function () {
 				context.dateTime = event.dateTime;
 				context.description = event.description;
 				context.imageURL = event.imageURL;
-
-
 			});
 	});
-
 	// //Organize Event
 	this.get("#/organize", function (context) {
 		context.userName = userName;
@@ -434,8 +429,8 @@ const app = Sammy("#main", function () {
 		let nameRegex = /\S{6,}/gm;
 		let dateTimeRegex = /(?<day>\d{1,2}) (?<month>\w{3,9}) ?-? ?(\d{1,2})?\:?(\d{2})? ?[AP]?[M]?/gm;
 		let descriptionRegex = /\S{10,}/gm;
-		let imageRegex = /^(https:\/\/)||^(http:\/\/)/gm;
-
+		let imageRegex = /^(https:\/\/)||^(http:\/\/)/gm;			
+				
 		if (nameRegex.test(this.params.name)){
 			if(dateTimeRegex.test(this.params.dateTime)){
 				if (descriptionRegex.test(this.params.description)){
@@ -449,7 +444,7 @@ const app = Sammy("#main", function () {
 							userID: user,
 							peopleInterstedIn: 0,
 						};
-				
+
 						let url =
 							"https://unievent-b9dfd-default-rtdb.firebaseio.com/events.json";
 						let headers = {
@@ -467,7 +462,7 @@ const app = Sammy("#main", function () {
 								setTimeout(function () {
 									successBox.style.display = "none";
 								}, 5000);
-				
+
 								context.redirect("#/homepage");
 							}
 						});
@@ -503,8 +498,6 @@ const app = Sammy("#main", function () {
 				context.redirect("/register");
 			});
 		}
-
-		
 	});
 });
 
