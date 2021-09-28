@@ -388,50 +388,45 @@ const app = Sammy("#main", function() {
 		let eventID = this.params.id;
 		context.userName = userName;
 		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/events/${eventID}.json`)
-			.then((response) => {
-				return response.json();
+		.then((response) => {
+			return response.json();
+		})
+		.then(data=> {
+
+			context.dateTime = data.dateTime;
+			context.description = data.description;
+			context.imageURL = data.imageURL;
+			context.name = data.name;
+			context.creator = data.creator;
+			context.peopleInterstedIn = data.peopleInterstedIn;
+
+			context
+			.loadPartials({
+				header: "./views/headerLoggedIn.hbs",
+				footer: "./views/footer.hbs"
 			})
-			.then(data=> {
-
-				let events = data;
-
-				let eventsArray = Object.entries(data);
-				eventsArray = eventsArray.map(function (innerArray) {
-					let [eventID, eventObj] = innerArray;
-					eventObj.id = eventID;
-					return eventObj;
+			.then(function(){
+				this.partial("./views/editEvent.hbs", function(details){
+					console.log("Went to edit event!");
 				});
-
-				context
-					.loadPartials({
-						header: "./views/headerLoggedIn.hbs",
-						footer: "./views/footer.hbs",
-					})
-					.then(function () {
-						this.partial(
-							"./views/editEvent.hbs",
-							function (details) {
-								console.log("Went to Edit Event!");
-							}
-						);
-					});
 			});
+		});
 	});
 	this.post("#/edit/:id", function (context) {
 		let eventID = this.params.id;
 		context.userName = userName;
 		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/events/${eventID}.json`)
-			.then((response) => {
-				return response.json();
-			})
-			.then(data=>{
-				console.log(data);
-				let event = data;
-				context.name = event.name;
-				context.dateTime = event.dateTime;
-				context.description = event.description;
-				context.imageURL = event.imageURL;
-			});
+		.then((response) => {
+			return response.json();
+		})
+		.then(data=>{
+			console.log(data);
+			let event = data;
+			context.name = event.name;
+			context.dateTime = event.dateTime;
+			context.description = event.description;
+			context.imageURL = event.imageURL;
+		});
 	});
 	// //Organize Event
 	this.get("#/organize", function (context) {
