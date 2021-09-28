@@ -2,9 +2,12 @@
 <div class="col-md-6 text-center col-lg">
     <img class="profile-img" src="./images/user.png" />
     <div class="profile-info">
-      <p>Username: <small>{{userName}}}</small></p>
-      <p class="infoType">Organizer of 2 events.</p>
+      <p>Username: <small>{{userName}}</small></p>
+      <p class="infoType">Organizer of {{count}} events.</p>
       {{#each events}}
       <p>{{name}}</p>
 	  {{/each}}
     </div>
+</div>
+
+{{> footer}}

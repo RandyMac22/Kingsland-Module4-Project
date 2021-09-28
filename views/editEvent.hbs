@@ -1,5 +1,5 @@
 {{> header}}
-<form action="#/editEvent" method="post">
+<form action="#/editEvent" method="put">
 
 	<div class="text-center mb-4">
 		<h1 class="h3 mb-3 font-weight-normal">Edit Event</h1>
@@ -7,22 +7,22 @@
 
 	<div class="form-label-group">
 		<input type="text" id="" name="name" class="form-control"
-			placeholder="Event" required="" autofocus="" value=""/>
+			placeholder="Event" required="" autofocus="" value="{{name}}"/>
 		<label for="inputEventName">Event</label>
 	</div>
 
 	<div class="form-label-group">
-		<input type="text" id="inpuEventDate" name="dateTime" class="form-control" placeholder="Date" required="" value="" />
+		<input type="text" id="inpuEventDate" name="dateTime" class="form-control" placeholder="Date" required="" value="{{dateTime}}" />
 		<label for="inpuEventDate">Date</label>
 	</div>
 
 	<div class="form-label-group">
-		<textarea type="text" id="inputEventDescription" name="description" class="form-control" placeholder="Description" required="" ></textarea>
+		<textarea type="text" id="inputEventDescription" name="description" class="form-control" placeholder="Description" required="" value="{{description}}" ></textarea>
 		<label for="inputEventDescription">Description</label>
 	</div>
 	<div class="form-label-group">
 		<input type="text" id="inputEventImage" name="imageURL" class="form-control"
-			placeholder="Image" required="" autofocus="" value="" />
+			placeholder="Image" required="" autofocus="" value={{imageURL}} />
 		<label for="inputEventImage">Image</label>
 	</div>
 	<div style="display: none">
