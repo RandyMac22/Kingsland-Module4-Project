@@ -258,6 +258,7 @@ const app = Sammy("#main", function() {
 	this.get("#/details/:id", function (context) {
 		let eventID = this.params.id;
 		context.userName = userName;
+		
 		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/events/${eventID}.json`)
 			.then((response) => {
 				//console.log(response);
@@ -265,12 +266,17 @@ const app = Sammy("#main", function() {
 			})
 			.then(data => {
 				console.log(data);
+
+				let eventsArray = Object.entries(data);
+				eventsArray = eventsArray.map(function (innerArray) {
+					let [eventID, eventObj] = innerArray;
+					eventObj.id = eventID;
+					return eventObj;
+				});
+
 				let events = data;
-
-				let joinBtn = document.getElementById('joinBtn');
-				let deleteBtn = document.getElementById('deleteBtn');
-				let editBtn = document.getElementById('editBtn');
-
+				
+				context.id = events.id;
 				context.name = events.name;
 				context.dateTime = events.dateTime;
 				context.description = events.description;
@@ -300,7 +306,7 @@ const app = Sammy("#main", function() {
 						this.partial("./views/eventDetails.hbs", function (details) {
 								console.log("Went to details!");
 							}
-						);
+						);	
 					});
 				}
 			})
@@ -311,36 +317,23 @@ const app = Sammy("#main", function() {
 	});
 	// //Profile
 	this.get("#/profile", function (context) {
-		
-		fetch("https://unievent-b9dfd-default-rtdb.firebaseio.com/events.json")
+		let userID = user;
+		context.userName = userName;
+		fetch(`https://unievent-b9dfd-default-rtdb.firebaseio.com/user/${userID}.json`)
 			.then(function (response) {
-				console.log(response);
+				//console.log(response);
 				return response.json();
 			})
 			.then(function (data) {
 				// get the template as a handlebars string
-				console.log(data);
-				//take data and turn it into an array of objects
-				let eventsArray = Object.entries(data);
-				console.log(eventsArray);
-				eventsArray = eventsArray
-					.map(function (innerArray) {
-						let [eventID, eventObj] = innerArray;
-						eventObj.id = eventID;
-						console.log(eventObj);
-						return eventObj;
-					})
-					.filter(function (object) {
-						return user == object.userID;
-					});
-				console.log(eventsArray);
-				context.events = eventsArray;
-				context
+				//console.log(data);
+				let users = data;
+					context
 					.loadPartials({
 						header: "./views/headerLoggedIn.hbs",
 						footer: "./views/footer.hbs",
 					})
-					.then(function () {
+					.then(function() {
 						this.partial("./views/profile.hbs", function (details) {
 							console.log("went to profile!");
 						});
@@ -349,6 +342,28 @@ const app = Sammy("#main", function() {
 			.catch((err) => {
 				console.log(err);
 				//change html to show an error has occured
+			});
+
+		fetch("https://unievent-b9dfd-default-rtdb.firebaseio.com/events.json")
+			.then(response => {
+				return response.json();
+			})
+			.then(data => {
+				console.log(data);
+				let count = 0;
+				let eventsArray = Object.entries(data);
+				eventsArray = eventsArray.map(function (innerArray){
+					let [eventID, eventObj] = innerArray;
+					eventObj.id = eventID;
+					return eventObj;
+				})
+				.filter(function(object){
+					return userName == object.creator;
+				});
+				console.log(eventsArray);
+				context.events = eventsArray;
+				context.count = eventsArray.length;
+				context.name = eventsArray.name;
 			});
 	});
 	this.post("#/delete/:id", function (context) {
@@ -362,7 +377,7 @@ const app = Sammy("#main", function() {
 				if (response.status == 200) {
 					successBox.innerText = "Event closed successfully.";
 					successBox.style.display = "block";
-					context.redirect("#/profile");
+					context.redirect("#/homepage");
 				}
 			})
 			.catch((err) => {
@@ -376,7 +391,17 @@ const app = Sammy("#main", function() {
 			.then((response) => {
 				return response.json();
 			})
-			.then(function () {
+			.then(data=> {
+
+				let events = data;
+
+				let eventsArray = Object.entries(data);
+				eventsArray = eventsArray.map(function (innerArray) {
+					let [eventID, eventObj] = innerArray;
+					eventObj.id = eventID;
+					return eventObj;
+				});
+
 				context
 					.loadPartials({
 						header: "./views/headerLoggedIn.hbs",
@@ -384,7 +409,7 @@ const app = Sammy("#main", function() {
 					})
 					.then(function () {
 						this.partial(
-							"./views/editEvents.hbs",
+							"./views/editEvent.hbs",
 							function (details) {
 								console.log("Went to Edit Event!");
 							}
